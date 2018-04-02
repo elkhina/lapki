@@ -16,9 +16,11 @@ type
     Button2: TButton;
     Edim: TEdit;
     UpDown1: TUpDown;
+    Button3: TButton;
     procedure Button2Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure EdimChange(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -36,10 +38,10 @@ type Matrix = array of array of real;
 
 var
 
- a:Matrix;   b:matrix;
+ a:Matrix;
  n, nold:integer;
 
- procedure Per(k:integer; var p:integer);
+ procedure Per(k:integer; var p:integer; Var b:matrix);
 {процедура перестановки строк, когда главный элемент=0}
 var i,j:integer;z:real;
 begin
@@ -69,14 +71,14 @@ znak:=1 else znak:=-1;
 end;
 
 procedure determ(var det:real);{нахождение определителя}
-var k,i,j,p:integer;  
+var k,i,j,p:integer;            Var b:matrix;
     r:real;
 begin
 b:=a;
 det:=1;
 for k:=1 to n do
    begin
-     if b[k,k]=0 then per(k, p);{если главный=0 - перестановка}
+     if b[k,k]=0 then per(k, p, b);{если главный=0 - перестановка}
      det:=znak(p)*det*b[k,k];{меняем знак}
      for j:=k+1 to n do
        begin
@@ -90,84 +92,18 @@ for k:=1 to n do
 end;
 
 
-{function AlgebDopl(a:Matrix; len, icor, jcor: byte): integer;
-var // алгебраическое дополнение
-i, j, icount, jcount: byte;
- NewMatrix: a;
- res: integer;
-begin
- SetLength(NewMatrix, len - 1, len - 1);
- icount := 0; jcount := 0;
- for i := 0 to len - 1 do
- begin
- if i = icor then
- continue;
- for j := 0 to len - 1 do
- if j <> jcor then
- begin
- NewMatrix[icount, jcount] := matrix[i, j];
- jcount := jcount + 1;
- end;
- jcount := 0;
- icount := icount + 1;
- end;
-
- res := matrix[icor, jcor] * determ(NewMatrix, len - 1);
- if (icor + jcor) mod 2 <> 0 then
- result := res * (-1)
- else
- result := res;
-end;
-
-
-function determ(a:Matrix; len: byte): integer;
+  procedure SGtoM(var z:matrix;  SG:TstringGrid);
 var
- res: integer; // определитель
-i: byte;
+ i, j :integer;
 begin
- if len = 1 then
- res := matrix[0, 0]
- else if len = 2 then
- res := matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0]
- else if len = 3 then
- res :=
- matrix[0, 0] * matrix[1, 1] * matrix[2, 2] +
- matrix[0, 1] * matrix[1, 2] * matrix[2, 0] +
- matrix[0, 2] * matrix[1, 0] * matrix[2, 1] -
- matrix[0, 2] * matrix[1, 1] * matrix[2, 0] -
- matrix[1, 2] * matrix[2, 1] * matrix[0, 0] -
- matrix[0, 1] * matrix[1, 0] * matrix[2, 2]
- else 
- begin
- res := 0;
- for i := 0 to len - 1 do
- res := res + AlgebDopl(matrix, len, i, 0); 
+ SG.RowCount:=STRtoINT(Form11.Edim.text);
+ SG.ColCount:=SG.RowCount;
+ setlength(z,SG.RowCount);
+ setlength(z[0],SG.RowCount);
+ for j:= 1 to SG.RowCount-1 do
+ for i:= 1 to SG.RowCount-1 do
+ FloattoStr(z[i,j]):=SG.Cells[j,i];
  end;
-
- result := res;
-
-end;}
-
-
-
-
-
-{procedure determ(var det:real);
-var k,i,j:integer;
-begin
-det:=1;
-for k:=1 to n do
-begin
-det:=det*a[k,k];
-for j:=k+1 to n do
-begin
-for i:=k to n do
-begin
-a[j,i]:=a[j,i]-(a[j,k]/a[k,k])*a[k,i];
-end;
-end;
-end;
-end;}
 
 
 procedure MtoSG(var z:matrix;  SG:TstringGrid);
@@ -221,6 +157,16 @@ determ(det);
 edit1.Text:= floattostr(det);
 end;
 
+
+procedure TForm11.Button3Click(Sender: TObject);
+//Вычислить
+var
+    det:real;
+begin
+MtoSG(a,sgA);
+determ(det);
+edit1.Text:= floattostr(det);
+end;
 
 procedure TForm11.EdimChange(Sender: TObject); // edit dimentions
 var i,j :integer;
