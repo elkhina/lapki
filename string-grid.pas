@@ -3,47 +3,29 @@ unit Unit11;
 interface
 
 uses
-
-Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-
-Dialogs, ComCtrls, StdCtrls, Grids, Math;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, ComCtrls, StdCtrls, Grids, Math;
 
 type
-
-TForm11 = class(TForm)
-
-StaticText1: TStaticText;
-
-StringGrid1: TStringGrid;
-
-StaticText2: TStaticText;
-
-Edit1: TEdit;
-
-Button1: TButton;
-
-Button2: TButton;
-
-Edim: TEdit;
-
-UpDown1: TUpDown;
-
-procedure Button2Click(Sender: TObject);
-
-procedure Button1Click(Sender: TObject);
-
-private
-
-{ Private declarations }
-
-public
-
-{ Public declarations }
-
-end;
+  TForm11 = class(TForm)
+    StaticText1: TStaticText;
+    SGA: TStringGrid;
+    StaticText2: TStaticText;
+    Edit1: TEdit;
+    Button1: TButton;
+    Button2: TButton;
+    Edim: TEdit;
+    UpDown1: TUpDown;
+    procedure Button2Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure EdimChange(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
 
 var
-
 Form11: TForm11;
 
 implementation
@@ -54,44 +36,10 @@ type Matrix = array of array of real;
 
 var
 
-a:Matrix;
+ a:Matrix;
+ n, nold:integer;
 
-n, nold:integer;
-{
-procedure determ(var det:real);
-
-var k,i,j:integer;
-
-begin
-
-det:=1;
-
-for k:=1 to n do
-
-begin
-
-det:=det*a[k,k];
-
-for j:=k+1 to n do
-
-begin 
-
-for i:=k to n do
-
-begin
-
-a[j,i]:=a[j,i]-(a[j,k]/a[k,k])*a[k,i];
-
-end;
-
-end;
-
-end;
-
-end;
-}
-
-procedure Per(k:integer; var p:integer);
+ procedure Per(k:integer; var p:integer);
 {процедура перестановки строк, когда главный элемент=0}
 var i,j:integer;z:real;
 begin
@@ -140,131 +88,155 @@ for k:=1 to n do
    end;
 end;
 
-procedure MtoSG(var z:matrix; SG:TstringGrid);
 
-var
-
-c, r, i, j :integer;
-
+{function AlgebDopl(a:Matrix; len, icor, jcor: byte): integer;
+var // алгебраическое дополнение
+i, j, icount, jcount: byte;
+ NewMatrix: a;
+ res: integer;
 begin
+ SetLength(NewMatrix, len - 1, len - 1);
+ icount := 0; jcount := 0;
+ for i := 0 to len - 1 do
+ begin
+ if i = icor then
+ continue;
+ for j := 0 to len - 1 do
+ if j <> jcor then
+ begin
+ NewMatrix[icount, jcount] := matrix[i, j];
+ jcount := jcount + 1;
+ end;
+ jcount := 0;
+ icount := icount + 1;
+ end;
 
-R:=length(z);
-
-C:=length(z[0]);
-
-SG.RowCount:=R;
-
-SG.ColCount:=C;
-
-for i:= 1 to r-1 do
-
-SG.Cells[0,i]:=IntToStr(i);
-
-for j:= 1 to c-1 do
-
-SG.Cells[j , 0]:=IntToStr(j);
-
-for i:= 1 to r-1 do
-
-for j:= 1 to c-1 do
-
-SG.Cells[j,i]:= FloattoStr(z[i,j]);
-
+ res := matrix[icor, jcor] * determ(NewMatrix, len - 1);
+ if (icor + jcor) mod 2 <> 0 then
+ result := res * (-1)
+ else
+ result := res;
 end;
+
+
+function determ(a:Matrix; len: byte): integer;
+var
+ res: integer; // определитель
+i: byte;
+begin
+ if len = 1 then
+ res := matrix[0, 0]
+ else if len = 2 then
+ res := matrix[0, 0] * matrix[1, 1] - matrix[0, 1] * matrix[1, 0]
+ else if len = 3 then
+ res :=
+ matrix[0, 0] * matrix[1, 1] * matrix[2, 2] +
+ matrix[0, 1] * matrix[1, 2] * matrix[2, 0] +
+ matrix[0, 2] * matrix[1, 0] * matrix[2, 1] -
+ matrix[0, 2] * matrix[1, 1] * matrix[2, 0] -
+ matrix[1, 2] * matrix[2, 1] * matrix[0, 0] -
+ matrix[0, 1] * matrix[1, 0] * matrix[2, 2]
+ else 
+ begin
+ res := 0;
+ for i := 0 to len - 1 do
+ res := res + AlgebDopl(matrix, len, i, 0); 
+ end;
+
+ result := res;
+
+end;}
+
+
+
+
+
+{procedure determ(var det:real);
+var k,i,j:integer;
+begin
+det:=1;
+for k:=1 to n do
+begin
+det:=det*a[k,k];
+for j:=k+1 to n do
+begin
+for i:=k to n do
+begin
+a[j,i]:=a[j,i]-(a[j,k]/a[k,k])*a[k,i];
+end;
+end;
+end;
+end;}
+
+
+procedure MtoSG(var z:matrix;  SG:TstringGrid);
+var
+ c, r, i, j :integer;
+begin
+ R:=length(z);
+ C:=length(z[0]);
+ SG.RowCount:=R;
+ SG.ColCount:=C;
+ for i:= 1 to r-1 do
+ SG.Cells[0,i]:=IntToStr(i);
+ for j:= 1 to c-1 do
+ SG.Cells[j , 0]:=IntToStr(j);
+ for i:= 1 to r-1 do
+ for j:= 1 to c-1 do
+ SG.Cells[j,i]:= FloattoStr(z[i,j]);
+ end;
+
 
 procedure TForm11.Button1Click(Sender: TObject);
-
 begin
-
 //Выход
-
 close;
-
 end;
 
-procedure Mrandom(var z:matrix; SG:TstringGrid);
-
+procedure Mrandom(var z:matrix);
 var
-
-c, r, i, j :integer;
+ c, r, i, j :integer;
 
 begin
-
 R:=length(z);
-
 C:=length(z[0]);
 
-SG.RowCount:=R;
-
-SG.ColCount:=C;
-
 randomize;
-
 begin
-
 for i:= 1 to r-1 do
-
-for j:= 1 to c-1 do
-
-z[i,j]:= random(18)-9;
-
+ for j:= 1 to c-1 do
+ z[i,j]:= random(18)-9;
 end;
-
 end;
 
 procedure TForm11.Button2Click(Sender: TObject);
-
 //Рандом
-
 var
-
-c, r, i, j :integer;
-
+    det:real;
 begin
-
 Mrandom(a);
-
-MtoSG(a);
-
-determ(a);
-
+MtoSG(a,sgA);
+determ(det);
+edit1.Text:= floattostr(det);
 end;
 
-procedure Edim.OnChange; // edit dimentions
 
+procedure TForm11.EdimChange(Sender: TObject); // edit dimentions
 var i,j :integer;
-
-begin
-
-Nold:=Length(a)-1;
-
-N:=Udim.Position;
-
-Setlength(a, N+1, N+1);
-
-if N > Nold then
-
-begin 
-
-for j := 1 to N do
-
-//for i := Nold to N do
-
-a[j,n]:=0;
-
-end;
-
-begin
+ begin
+ Nold:=Length(a)-1;
+ N:=UpDown1.Position;
+ Setlength(a, N+1, N+1);
+ if N > Nold then
+ begin 
+ for j := 1 to N do
+ //for i := Nold to N do
+ a[j,n]:=0;
 
 // for j := Nold to N do
-
-for i := 1 to N do
-
-a[n,i]:=0;
-
-end;
-
-end;
-
-end.
-{i love igor}
+ for i := 1 to N do
+ a[n,i]:=0;
+ end;
+mtosg(a,SGA);
+ end;
+ end.
