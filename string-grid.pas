@@ -36,7 +36,7 @@ type Matrix = array of array of real;
 
 var
 
- a:Matrix;
+ a:Matrix;   b:matrix;
  n, nold:integer;
 
  procedure Per(k:integer; var p:integer);
@@ -69,20 +69,21 @@ znak:=1 else znak:=-1;
 end;
 
 procedure determ(var det:real);{нахождение определителя}
-var k,i,j,p:integer;
+var k,i,j,p:integer;  
     r:real;
 begin
+b:=a;
 det:=1;
 for k:=1 to n do
    begin
-     if a[k,k]=0 then per(k, p);{если главный=0 - перестановка}
-     det:=znak(p)*det*a[k,k];{меняем знак}
+     if b[k,k]=0 then per(k, p);{если главный=0 - перестановка}
+     det:=znak(p)*det*b[k,k];{меняем знак}
      for j:=k+1 to n do
        begin
-         r:=a[j,k]/a[k,k];
+         r:=b[j,k]/b[k,k];
          for i:=k to n do
            begin
-             a[j,i]:=a[j,i]-r*a[k,i];
+             b[j,i]:=b[j,i]-r*b[k,i];
            end;
        end;
    end;
